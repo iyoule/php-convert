@@ -3,13 +3,15 @@
 namespace iyoule\Convert;
 
 
+use iyoule\Convert\Exception\ConvertException;
+use iyoule\Reflection\ReflectionClass;
+use iyoule\Reflection\ReflectionProperty;
 use \ReflectionException;
 
 class Convert
 {
 
     private $source;
-    private static $_propertyCache = [];
 
     public function __construct($source)
     {
@@ -25,6 +27,7 @@ class Convert
     /**
      * @param $type
      * @return array|bool|float|int|object|string
+     * @throws ConvertException
      * @throws ReflectionException
      */
     public function to($type)
@@ -45,6 +48,7 @@ class Convert
      * @param $className
      * @param $object
      * @return array|object
+     * @throws ConvertException
      * @throws ReflectionException
      */
     private function byObject($className, $object)
@@ -59,6 +63,7 @@ class Convert
      * @param $className
      * @param array $array
      * @return array|object
+     * @throws ConvertException
      * @throws ReflectionException
      */
     private function byArray($className, array $array)
@@ -71,7 +76,7 @@ class Convert
                 if (is_numeric($key)) unset($array[$key]);
             }
         }
-        $reflectClass = new \ReflectionClass($className);
+        $reflectClass = new ReflectionClass($className);
 
         if ($isAry) {
             $data = [];
@@ -88,6 +93,7 @@ class Convert
      * @param $className
      * @param null $ref
      * @return object
+     * @throws ConvertException
      * @throws ReflectionException
      */
     private function newInstance($className, &$ref = null)
@@ -95,33 +101,38 @@ class Convert
         if (!class_exists($className)) {
             trigger_error("Uncaught Error: Class '{$className}' not found", E_USER_ERROR);
         }
-        $ref = new \ReflectionClass($className);
+        $ref = new ReflectionClass($className);
         return $this->newInstanceInitPropertyWithoutConstructor($ref);
     }
 
 
     /**
-     * @param \ReflectionClass $reflectionClass
+     * @param ReflectionClass $reflectionClass
      * @param array $data
      * @return object
+     * @throws ConvertException
      * @throws ReflectionException
      */
-    private function newInstanceInitPropertyWithoutConstructor(\ReflectionClass $reflectionClass, $data = [])
+    private function newInstanceInitPropertyWithoutConstructor(ReflectionClass $reflectionClass, $data = [])
     {
         $object = $reflectionClass->newInstanceWithoutConstructor();
         foreach ($reflectionClass->getProperties() as $property) {
+            /**
+             * @var $property ReflectionProperty
+             */
             $property->setAccessible(true);
-            $type = $this->getPropertyType($property);
+            $type = $property->getType();
+            $typeName = $type->getName();
             $value = $data[$property->getName()] ?? null;
-            if ($type !== null) {
-                if ($type == 'resource' && !is_resource($value)) {
+            if ($typeName) {
+                if ($typeName == 'resource' && !is_resource($value)) {
                     throw new ConvertException('value is most resource');
-                } elseif ($this->isScalar($type)) {
-                    $value = isset($value) ? ConvertScalar::from($value)->to($type) : null;
-                } elseif ($type === 'array') {
+                } elseif ($this->isScalar($typeName)) {
+                    $value = isset($value) ? ConvertScalar::from($value)->to($typeName) : null;
+                } elseif ($typeName === 'array') {
                     $value = is_array($value) ? $value : is_null($value) ? [] : [$value];
-                } elseif (!empty($type) && $value) {
-                    $value = self::from($value)->to($type);
+                } elseif (!empty($typeName) && ($typeName != 'mixed') && $value) {
+                    $value = self::from($value)->to($typeName);
                 }
             }
             $property->setValue($object, $value);
@@ -141,23 +152,4 @@ class Convert
         return ConvertScalar::from($val)->to($type);
     }
 
-
-    private function getPropertyType(\ReflectionProperty $property)
-    {
-        $reflectClass = $property->getDeclaringClass();
-        $name = $reflectClass->getName() . '::' . $property->getName();
-        $type = self::$_propertyCache[$name] ?? false;
-        if ($type === false) {
-            $doc = $property->getDocComment();
-            if ($doc !== false) {
-                if (preg_match("#@var\s+([^\s]*)#i", $doc, $ary)) {
-                    $type = $ary[1];
-                }
-            } else {
-                $type = false;
-            }
-            self::$_propertyCache[$name] = $type;
-        }
-        return $type;
-    }
 }
