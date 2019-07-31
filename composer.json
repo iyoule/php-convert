@@ -1,0 +1,31 @@
+{
+  "name": "iyoule/php-convert",
+  "autoload": {
+    "psr-4": {
+      "iyoule\\Convert\\": "src"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "require": {
+    "php": ">7.1.0",
+    "iyoule/php-reflection": "^1.0"
+  },
+  "repositories": [
+    {
+      "type": "package",
+      "package": [
+        {
+          "name": "iyoule/php-reflection",
+          "version": "1.0",
+          "source": {
+            "type": "git",
+            "url": "https://github.com/iyoule/php-reflection",
+            "reference": "master"
+          }
+        }
+      ]
+    }
+  ]
+}
