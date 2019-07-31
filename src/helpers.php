@@ -18,3 +18,15 @@ function convert_type($source, $type)
         throw new \TypeError($e->getMessage());
     }
 }
+
+
+/**
+ * @param $val
+ * @param $type
+ * @return bool|float|int|string
+ * @throws Exception\ConvertException
+ */
+function setType($val, $type)
+{
+    return ConvertScalar::from($val)->to($type);
+}

@@ -33,7 +33,7 @@ class Convert
     public function to($type)
     {
         if ($this->isScalar($type)) {
-            return $this->toScalar($type, $this->source);
+            return (new ConvertScalar($this->source))->to($type);
         } else if (is_array($this->source)) {
             return $this->byArray($type, $this->source);
         } else if (is_object($this->source)) {
@@ -147,9 +147,5 @@ class Convert
     }
 
 
-    private function toScalar($type, $val)
-    {
-        return ConvertScalar::from($val)->to($type);
-    }
 
 }

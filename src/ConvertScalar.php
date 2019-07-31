@@ -2,6 +2,8 @@
 
 namespace iyoule\Convert;
 
+use iyoule\Convert\Exception\ConvertException;
+
 class ConvertScalar
 {
     const BOOL = 'bool';
@@ -12,7 +14,7 @@ class ConvertScalar
 
     private $data;
 
-    private function __construct($data)
+    public function __construct($data)
     {
         $this->data = $data;
     }
@@ -25,7 +27,8 @@ class ConvertScalar
 
     /**
      * @param $type
-     * @return array|bool|float|int|string
+     * @return bool|float|int|string
+     * @throws ConvertException
      */
     public function to($type)
     {
@@ -45,7 +48,7 @@ class ConvertScalar
 //            case 'array':
 //                return $this->data === null ? [] : array($this->data);
             default:
-                trigger_error("Uncaught Error: ValueType '{$type}' is not scalar", E_USER_ERROR);
+                throw new ConvertException("Uncaught Error: ValueType '{$type}' is not scalar");
         }
     }
 
