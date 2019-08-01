@@ -10,7 +10,7 @@
   },
   "require": {
     "php": ">7.1.0",
-    "iyoule/php-reflection": "^1.0"
+    "iyoule/php-reflection": "1.0"
   },
   "repositories": [
     {
