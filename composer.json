@@ -14,18 +14,9 @@
   },
   "repositories": [
     {
-      "type": "package",
-      "package": [
-        {
-          "name": "iyoule/php-reflection",
-          "version": "1.0",
-          "source": {
-            "type": "git",
-            "url": "https://github.com/iyoule/php-reflection",
-            "reference": "master"
-          }
-        }
-      ]
+      "name": "iyoule/php-reflection",
+      "type": "vcs",
+      "url": "https://github.com/iyoule/php-reflection.git"
     }
   ]
 }
