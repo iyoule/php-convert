@@ -40,7 +40,7 @@ class ConvertScalar
                 return (int)$this->data;
             case 'float':
             case 'double':
-                return floor($this->data);
+                return (float)($this->data);
                 break;
             case 'bool':
             case 'boolean':
